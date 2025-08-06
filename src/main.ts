@@ -3,23 +3,15 @@ import { AppModule } from './app.module';
 import { ValidationPipe } from '@nestjs/common';
 import { useContainer } from 'class-validator';
 
- // Habilita as validações globais
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
- // Habilita as validações globais
-  app.useGlobalPipes
-  (new ValidationPipe({
-    whitelist: true, // Remove propriedades não declaradas nos DTOs
-    forbidNonWhitelisted: true, // Lança erro se existirem propriedades não declaradas
-    transform: true, // Transforma os objetos recebidos em instâncias das classes DTO
-  transformOptions: {
-      enableImplicitConversion: true, // Permite conversão implícita de tipos
-    },
-  })
-);
+  // Validação básica 
+  app.useGlobalPipes(new ValidationPipe({
+    transform: true,
+  }));
    
-   // Integração do class-validator com container do Nest
+  // Integração do class-validator com container do Nest
   useContainer(app.select(AppModule), { fallbackOnErrors: true });
   
   // Configuração básica de CORS
@@ -30,7 +22,10 @@ async function bootstrap() {
     allowedHeaders: 'Content-Type, Authorization', // Cabeçalhos permitidos
   });
   
-  // Inicia a aplicação na porta especificada ou na porta 4000 por padrão
-  await app.listen(process.env.PORT ?? 4000);
+  // Usa a porta do .env ou 3000 como padrão
+  const port = process.env.APP_PORT || 3000;
+  await app.listen(port);
+  
+  console.log(`Application is running on: http://localhost:${port}`);
 }
 bootstrap();
